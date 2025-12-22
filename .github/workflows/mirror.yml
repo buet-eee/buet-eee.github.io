@@ -1,15 +1,21 @@
-name: Mirror Grav site to GitHub Pages
+name: Mirror eee.buet.ac.bd to buet-eee.github.io
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */12 * * *"   # every 6 hours (UTC)
+    - cron: "0 */20 * * *"  # every 20 hours (UTC)
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
-  mirror:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -18,14 +24,21 @@ jobs:
       - name: Install wget
         run: sudo apt-get update && sudo apt-get install -y wget
 
-      - name: Crawl site
-        run: |
-          bash mirror.sh
+      - name: Crawl https://eee.buet.ac.bd
+        run: bash mirror.sh
 
-      # Deploy the generated /site folder to gh-pages branch
-      - name: Deploy to GitHub Pages (gh-pages branch)
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./site
-          publish_branch: gh-pages
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
