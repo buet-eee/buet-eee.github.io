@@ -15,19 +15,34 @@ rm -rf "${OUT_DIR}"
 mkdir -p "${OUT_DIR}"
 
 # Crawl and convert into a static, browsable mirror.
+# Some assets may return 404/403 intermittently; do not abort solely on those.
+set +e
+
+#wget --continue --no-verbose --retry-connrefused --waitretry=2 --timeout=30 --tries=3 $URL || echo "Warning: $URL not found, skipping."
 wget \
   --mirror \
   --page-requisites \
+  --continue \
+  --retry-connrefused \
+  --waitretry=2 \
+  --tries=3 \
   --convert-links \
   --adjust-extension \
   --no-parent \
   --execute robots=off \
   --domains="${HOST}" \
-  --timeout=30 \
-  --tries=2 \
-  --wait=1 \
+  --timeout=60 \
+  --tries=3 \
+  --random-wait \
+  --wait=2 \
+  --server-response \
+  --content-on-error \
   --directory-prefix="${OUT_DIR}" \
   "${SITE_URL}"
+WGET_RC=$?
+set -e
+
+echo "wget exit code: ${WGET_RC}"
 
 # wget typically creates: public/eee.buet.ac.bd/...
 # For https://buet-eee.github.io/ we need index.html at public/

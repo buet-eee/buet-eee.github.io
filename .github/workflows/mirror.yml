@@ -18,8 +18,9 @@ jobs:
       - name: Install wget
         run: sudo apt-get update && sudo apt-get install -y wget
 
-      - name: Crawl https://eee.buet.ac.bd
-        run: bash mirror.sh
+        - name: Crawl https://eee.buet.ac.bd (debug)
+        run: |
+          bash -x mirror.sh
 
       - name: Deploy public/ to gh-pages
         uses: peaceiris/actions-gh-pages@v4
