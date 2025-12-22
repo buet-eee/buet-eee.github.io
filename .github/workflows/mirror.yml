@@ -31,8 +31,8 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: public
-          - name: Diagnostics - verify public/ exists and has index.html
-          run: |
+      - name: Diagnostics - verify public/ exists and has index.html
+        run: |
             echo "PWD=$(pwd)"
             echo "Listing repo root:"
             ls -la
