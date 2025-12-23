@@ -3,7 +3,7 @@ name: Mirror eee.buet.ac.bd to buet-eee.github.io
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */20 * * *"  # every 20 hours (UTC)
+    - cron: "0 */6 * * *"
 
 permissions:
   contents: read
@@ -24,33 +24,19 @@ jobs:
       - name: Install wget
         run: sudo apt-get update && sudo apt-get install -y wget
 
-      - name: Crawl https://eee.buet.ac.bd
+      - name: Build mirror
         run: bash mirror.sh
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: public
-      - name: Diagnostics - verify public/ exists and has index.html
-        run: |
-            echo "PWD=$(pwd)"
-            echo "Listing repo root:"
-            ls -la
-            echo "Listing public/:"
-            ls -la public || true
-            echo "Find index.html:"
-            find public -maxdepth 3 -name "index.html" -print || true
-            echo "Count files in public/:"
-            find public -type f | wc -l
-            echo "Disk usage of public/:"
-            du -sh public || true
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
-        id: deployment
         uses: actions/deploy-pages@v4
